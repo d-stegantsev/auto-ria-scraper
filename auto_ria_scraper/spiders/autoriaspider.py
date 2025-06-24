@@ -58,18 +58,14 @@ class AutoRiaSpider(scrapy.Spider):
         # Username
         seller_area = response.css("div.seller_info_area")
 
-        usernames = seller_area.css("a.sellerPro::text").getall()
-        if usernames:
-            username = usernames[1].strip() if len(usernames) > 1 else usernames[0].strip()
+        name_node = seller_area.css(".seller_info_name")
+        if name_node:
+            username = name_node.xpath("normalize-space(string(.))").get()
         else:
-            username = seller_area.css("h4.seller_info_name a::text").get()
-            if not username:
-                username = response.xpath(
-                    "//div[contains(@class, 'seller_info_name') and contains(@class, 'bold')]/text()").get()
-                if username:
-                    username = username.strip()
+            raw = seller_area.css("a.sellerPro::text").get()
+            username = raw.strip() if raw else None
 
-        item["username"] = username if username else None
+        item["username"] = username
 
         # Phone number
         phone_raw = response.css("a.phone-button::attr(data-phone)").get()
