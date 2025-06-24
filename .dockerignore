@@ -1,0 +1,37 @@
+# Ignore Python cache files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environments
+venv
+env
+ENV
+.venv
+.env
+
+# Ignore git folder
+.git
+.gitignore
+
+# Ignore IDE/Editor folders
+.vscode
+.idea
+
+# Ignore test cache and logs
+.pytest_cache
+.cache
+*.log
+
+# Ignore local dumps (щоб не додавати дампи в образ)
+dumps/
+
+# Ignore Docker-related files not needed in image
+docker-compose.yml
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# Ignore system files
+.DS_Store
+Thumbs.db

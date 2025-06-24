@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.manifest
+*.spec
+pip-wheel-metadata/
+*.log
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# pytest
+.cache/
+.pytest_cache/
+
+# Docker
+*.pid
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# Docker volumes and containers (не зберігати локальні дані)
+**/volumes/
+**/containers/
+
+# Env files with secrets
+.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore dumps folder (якщо дампи будуть генеруватись і не хочеш пушити)
+dumps/
