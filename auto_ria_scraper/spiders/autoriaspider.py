@@ -93,12 +93,16 @@ class AutoRiaSpider(scrapy.Spider):
         item["images_count"] = images_count
 
         # Car number
-        car_number = response.css("div.car-number span.value::text").get()
-        item["car_number"] = car_number.strip() if car_number else None
+        car_number = response.css("span.state-num.ua::text").get()
+        if car_number:
+            car_number = car_number.strip()
+        item["car_number"] = car_number
 
         # VIN
-        vin = response.css("div.vin span.value::text").get()
-        item["car_vin"] = vin.strip() if vin else None
+        vin = response.css("span.label-vin::text").get()
+        if vin:
+            vin = vin.strip()
+        item["car_vin"] = vin
 
         item["datetime_found"] = datetime.now(timezone(timedelta(hours=3))).isoformat()
 
