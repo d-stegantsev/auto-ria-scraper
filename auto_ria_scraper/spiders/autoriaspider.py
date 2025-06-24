@@ -30,12 +30,18 @@ class AutoRiaSpider(scrapy.Spider):
         item["title"] = response.css("h1.head::text").get()
 
         # Price USD
-        price_text = response.css("span.price-value::text").get()
-        if price_text:
-            price_clean = re.sub(r"[^\d]", "", price_text)
+
+        price_usd_text = response.css("div.price_value--additional span[data-currency='USD']::text").get()
+        if price_usd_text:
+            price_clean = re.sub(r"[^\d]", "", price_usd_text)
             item["price_usd"] = int(price_clean) if price_clean.isdigit() else None
         else:
-            item["price_usd"] = None
+            price_text = response.css("div.price_value strong::text").get()
+            if price_text:
+                price_clean = re.sub(r"[^\d]", "", price_text)
+                item["price_usd"] = int(price_clean) if price_clean.isdigit() else None
+            else:
+                item["price_usd"] = None
 
         # Odometer
         odometer_text = response.css("div.data-block span.value::text").re_first(r"[\d\s]+")
