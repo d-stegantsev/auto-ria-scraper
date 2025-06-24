@@ -1,6 +1,9 @@
 import scrapy
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import re
+
+from auto_ria_scraper.items import AutoRiaItem
+
 
 class AutoRiaSpider(scrapy.Spider):
     name = "autoriaspider"
@@ -19,10 +22,9 @@ class AutoRiaSpider(scrapy.Spider):
             yield response.follow(next_page, callback=self.parse)
 
     def parse_car_detail(self, response):
-        item = {}
+        item = AutoRiaItem()
 
         item["url"] = response.url
-        item["datetime_found"] = datetime.utcnow().isoformat()
 
         # Title
         item["title"] = response.css("h1.head::text").get()
@@ -65,6 +67,6 @@ class AutoRiaSpider(scrapy.Spider):
         vin = response.css("div.vin span.value::text").get()
         item["car_vin"] = vin.strip() if vin else None
 
-        item["datetime_found"] = datetime.utcnow().isoformat()
+        item["datetime_found"] = datetime.now(timezone(timedelta(hours=3))).isoformat()
 
         yield item
