@@ -30,7 +30,6 @@ class AutoRiaSpider(scrapy.Spider):
         item["title"] = response.css("h1.head::text").get()
 
         # Price USD
-
         price_usd_text = response.css("div.price_value--additional span[data-currency='USD']::text").get()
         if price_usd_text:
             price_clean = re.sub(r"[^\d]", "", price_usd_text)
@@ -72,11 +71,26 @@ class AutoRiaSpider(scrapy.Spider):
         item["phone_number"] = phone_raw if phone_raw else None
 
         # Image URL
-        item["image_url"] = response.css("div.gallery img::attr(src)").get()
+        photo_blocks = response.xpath("//div[@class='photo-620x465']")
+
+        main_image = None
+        for block in photo_blocks:
+            img_url = block.xpath(".//img[@class='outline m-auto']/@src").get()
+            if img_url:
+                main_image = img_url
+                break
+
+        item["image_url"] = main_image
 
         # Images count
-        images = response.css("div.gallery img")
-        item["images_count"] = len(images)
+        photos_text = response.css("a.show-all.link-dotted::text").get()
+
+        images_count = None
+        if photos_text:
+            match = re.search(r"(\d+)", photos_text)
+            if match:
+                images_count = int(match.group(1))
+        item["images_count"] = images_count
 
         # Car number
         car_number = response.css("div.car-number span.value::text").get()
