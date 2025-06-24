@@ -44,12 +44,16 @@ class AutoRiaSpider(scrapy.Spider):
                 item["price_usd"] = None
 
         # Odometer
-        odometer_text = response.css("div.data-block span.value::text").re_first(r"[\d\s]+")
-        if odometer_text:
-            odometer_clean = re.sub(r"[^\d]", "", odometer_text)
-            item["odometer"] = int(odometer_clean) if odometer_clean.isdigit() else None
+        odometer_span = response.css("div.base-information.bold span.size18::text").get()
+        if odometer_span:
+            try:
+                odometer_val = int(odometer_span.strip())
+                odometer = odometer_val * 1000
+            except ValueError:
+                odometer = None
         else:
-            item["odometer"] = None
+            odometer = None
+        item["odometer"] = odometer
 
         # Username
         item["username"] = response.css("div.seller-name a::text").get()
