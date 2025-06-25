@@ -10,9 +10,9 @@ class AutoRiaSpider(scrapy.Spider):
     name = "autoriaspider"
     allowed_domains = ["auto.ria.com"]
     start_urls = ["https://auto.ria.com/uk/search/?lang_id=4&page=0&countpage=100&indexName=auto&custom=1&abroad=2"]
+    max_pages = 10
 
     def parse(self, response):
-        # Select car listings on the page
         cars = response.css("div.content-bar")
         if not cars:
             return
@@ -21,25 +21,21 @@ class AutoRiaSpider(scrapy.Spider):
             if url:
                 yield response.follow(url, callback=self.parse_car_detail)
 
-        # Pagination logic: increment the page parameter and request next page
         parsed = urlparse(response.url)
         qs = parse_qs(parsed.query)
         current_page = int(qs.get("page", ["0"])[0])
-        next_page = current_page + 1
-        qs["page"] = [str(next_page)]
-        new_query = urlencode(qs, doseq=True)
-        next_url = urlunparse(parsed._replace(query=new_query))
-        yield scrapy.Request(next_url, callback=self.parse)
+        if current_page < self.max_pages:
+            next_page = current_page + 1
+            qs["page"] = [str(next_page)]
+            new_query = urlencode(qs, doseq=True)
+            next_url = urlunparse(parsed._replace(query=new_query))
+            yield scrapy.Request(next_url, callback=self.parse)
+        else:
+            self.logger.info(f"Reached max page {self.max_pages}, stopping pagination")
 
     def parse_car_detail(self, response):
         item = AutoRiaItem()
-
         item["url"] = response.url
-
-        # Title
-        item["title"] = response.css("h1.head::text").get()
-
-        # Price USD
         price_usd_text = response.css("div.price_value--additional span[data-currency='USD']::text").get()
         if price_usd_text:
             price_clean = re.sub(r"[^\d]", "", price_usd_text)
@@ -51,8 +47,6 @@ class AutoRiaSpider(scrapy.Spider):
                 item["price_usd"] = int(price_clean) if price_clean.isdigit() else None
             else:
                 item["price_usd"] = None
-
-        # Odometer
         odometer_span = response.css("div.base-information.bold span.size18::text").get()
         if odometer_span:
             try:
@@ -63,8 +57,6 @@ class AutoRiaSpider(scrapy.Spider):
         else:
             odometer = None
         item["odometer"] = odometer
-
-        # Username
         seller_area = response.css("div.seller_info_area")
         name_node = seller_area.css(".seller_info_name")
         if name_node:
@@ -73,8 +65,6 @@ class AutoRiaSpider(scrapy.Spider):
             raw = seller_area.css("a.sellerPro::text").get()
             username = raw.strip() if raw else None
         item["username"] = username
-
-        # Image URL
         photo_blocks = response.xpath("//div[@class='photo-620x465']")
         main_image = None
         for block in photo_blocks:
@@ -83,8 +73,6 @@ class AutoRiaSpider(scrapy.Spider):
                 main_image = img_url
                 break
         item["image_url"] = main_image
-
-        # Images count
         photos_text = response.css("a.show-all.link-dotted::text").get()
         images_count = None
         if photos_text:
@@ -92,23 +80,11 @@ class AutoRiaSpider(scrapy.Spider):
             if match:
                 images_count = int(match.group(1))
         if images_count is None:
-            photo_blocks = response.xpath("//div[contains(@class, 'photo-620x465')]")
             images_count = len(photo_blocks)
         item["images_count"] = images_count
-
-        # Car number
         car_number = response.css("span.state-num.ua::text").get()
-        if car_number:
-            car_number = car_number.strip()
-        item["car_number"] = car_number
-
-        # VIN
+        item["car_number"] = car_number.strip() if car_number else None
         vin = response.css("span.label-vin::text").get()
-        if vin:
-            vin = vin.strip()
-        item["car_vin"] = vin
-
-        # Record the found datetime with local timezone
+        item["car_vin"] = vin.strip() if vin else None
         item["datetime_found"] = datetime.now(timezone(timedelta(hours=3))).isoformat()
-
         yield item

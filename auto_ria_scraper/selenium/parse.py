@@ -117,7 +117,6 @@ def worker():
                 phone = None
                 status = "error"
             update_phone_number(conn, car_id, phone, status)
-            logging.info(f"Worker {name}: Car {car_id} -> status={status}, phone={phone}")
     finally:
         driver.quit()
         conn.close()
