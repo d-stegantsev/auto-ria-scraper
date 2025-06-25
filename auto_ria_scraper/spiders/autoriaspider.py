@@ -10,7 +10,7 @@ class AutoRiaSpider(scrapy.Spider):
     name = "autoriaspider"
     allowed_domains = ["auto.ria.com"]
     start_urls = ["https://auto.ria.com/uk/search/?lang_id=4&page=0&countpage=100&indexName=auto&custom=1&abroad=2"]
-    max_pages = 10
+    max_pages = 30
 
     def parse(self, response):
         cars = response.css("div.content-bar")
@@ -36,6 +36,7 @@ class AutoRiaSpider(scrapy.Spider):
     def parse_car_detail(self, response):
         item = AutoRiaItem()
         item["url"] = response.url
+        item["title"] = response.css("h1.head::text").get().strip() if response.css("h1.head::text").get() else None
         price_usd_text = response.css("div.price_value--additional span[data-currency='USD']::text").get()
         if price_usd_text:
             price_clean = re.sub(r"[^\d]", "", price_usd_text)
