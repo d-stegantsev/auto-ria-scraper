@@ -22,5 +22,14 @@ services:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
 
+  selenium-parser:
+    build:
+      context: auto_ria_scraper/selenium
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
 volumes:
   pgdata:
