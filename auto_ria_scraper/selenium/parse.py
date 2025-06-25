@@ -1,3 +1,4 @@
+import re
 import time
 import psycopg2
 import os
@@ -27,6 +28,14 @@ def get_pending_urls(conn):
         cur.execute("SELECT id, url FROM cars WHERE phone_status = 'pending'")
         return cur.fetchall()
 
+def format_phone_number(phone):
+    if not phone:
+        return None
+    digits = re.sub(r"\D", "", phone)
+    if digits.startswith("0") and len(digits) == 10:
+        return "38" + digits
+    return digits
+
 def update_phone_number(conn, car_id, phone, status):
     with conn.cursor() as cur:
         cur.execute(
@@ -45,18 +54,15 @@ def create_driver():
 
 def get_phone_number(driver, url):
     driver.get(url)
-    # wait for the phone span to appear
     span = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "span.phone.bold"))
     )
     initial = span.get_attribute("data-phone-number")
-    # click the "показати" link via JS
     try:
         link = span.find_element(By.CSS_SELECTOR, "a.phone_show_link")
         driver.execute_script("arguments[0].click();", link)
     except Exception as e:
         print(f"Click error for {url}: {e}")
-    # wait until the phone attribute no longer contains masked 'xxx'
     WebDriverWait(driver, 10).until(
         lambda d: span.get_attribute("data-phone-number") and "xxx" not in span.get_attribute("data-phone-number")
     )
@@ -70,14 +76,14 @@ def main():
             with get_db_connection() as conn:
                 rows = get_pending_urls(conn)
                 if not rows:
-                    print("No pending records. Sleeping 15s…")
-                    time.sleep(15)
+                    print("No pending records. Sleeping 5s…")
+                    time.sleep(5)
                     continue
 
                 for car_id, url in rows:
-                    print(f"→ Processing car id={car_id}: {url}")
                     try:
                         phone = get_phone_number(driver, url)
+                        phone = format_phone_number(phone)
                         status = "success"
                     except Exception as ex:
                         print(f"Error parsing {url}: {ex}")
