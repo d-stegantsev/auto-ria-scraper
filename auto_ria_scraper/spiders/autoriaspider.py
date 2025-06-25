@@ -8,7 +8,7 @@ from auto_ria_scraper.items import AutoRiaItem
 class AutoRiaSpider(scrapy.Spider):
     name = "autoriaspider"
     allowed_domains = ["auto.ria.com"]
-    start_urls = ["https://auto.ria.com/uk/car/used/"]
+    start_urls = ["https://auto.ria.com/uk/search/?lang_id=4&page=0&countpage=100&indexName=auto&custom=1&abroad=2"]
 
     def parse(self, response):
         cars = response.css("div.content-bar")
