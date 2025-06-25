@@ -66,10 +66,6 @@ class AutoRiaSpider(scrapy.Spider):
 
         item["username"] = username
 
-        # Phone number
-        phone_raw = response.css("a.phone-button::attr(data-phone)").get()
-        item["phone_number"] = phone_raw if phone_raw else None
-
         # Image URL
         photo_blocks = response.xpath("//div[@class='photo-620x465']")
 
@@ -90,6 +86,11 @@ class AutoRiaSpider(scrapy.Spider):
             match = re.search(r"(\d+)", photos_text)
             if match:
                 images_count = int(match.group(1))
+
+        if images_count is None:
+            photo_blocks = response.xpath("//div[contains(@class, 'photo-620x465')]")
+            images_count = len(photo_blocks)
+
         item["images_count"] = images_count
 
         # Car number
