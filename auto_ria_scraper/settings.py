@@ -95,3 +95,5 @@ FEED_EXPORT_ENCODING = "utf-8"
 ITEM_PIPELINES = {
     "auto_ria_scraper.pipelines.PostgresPipeline": 100,
 }
+
+LOG_LEVEL = "WARNING"
