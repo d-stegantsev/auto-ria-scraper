@@ -87,19 +87,24 @@ def worker():
     conn = get_db_connection()
     try:
         while True:
+            # Fetch pending first, then retry any error statuses
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT id, url FROM cars WHERE phone_status='pending' "
-                    "FOR UPDATE SKIP LOCKED LIMIT 1"
+                    "SELECT id, url FROM cars "
+                    "WHERE phone_status IN ('pending','error') "
+                    "ORDER BY CASE WHEN phone_status='pending' THEN 0 ELSE 1 END "
+                    "LIMIT 1 "
+                    "FOR UPDATE SKIP LOCKED"
                 )
                 row = cur.fetchone()
             if not row:
                 time.sleep(5)
                 continue
             car_id, url = row
+            # Mark as in progress
             with conn:
-                cur = conn.cursor()
-                cur.execute(
+                cur2 = conn.cursor()
+                cur2.execute(
                     "UPDATE cars SET phone_status='in_progress' WHERE id=%s",
                     (car_id,),
                 )
