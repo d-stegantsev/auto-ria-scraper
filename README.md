@@ -144,6 +144,60 @@ docker-compose run --rm selenium-parser
 
 ---
 
+## Using pgAdmin for PostgreSQL Management
+
+You can use **pgAdmin** (a web interface for managing PostgreSQL databases) via the included Docker service.
+
+### How to Access pgAdmin
+
+1. **Start all services:**
+
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Open your browser and go to:**  
+   [http://localhost:5050](http://localhost:5050)
+
+3. **Login credentials:**
+
+   - **Email:** `admin@admin.com`
+   - **Password:** `admin`
+
+   > You can change these credentials in the `docker-compose.yml` file.
+
+4. **Add a new PostgreSQL server in pgAdmin:**
+
+   - Click **Add New Server**.
+   - Go to the **General** tab and enter a name, e.g. `Postgres (Docker)`.
+   - Go to the **Connection** tab and fill in:
+     - **Host name/address:** `postgres`
+     - **Port:** `5432`
+     - **Username:** `autoria`
+     - **Password:** `autoria`
+
+   > The host must match the service name of your PostgreSQL container (usually `postgres`).
+
+5. **Click Save.**  
+   You can now view, query, and manage your database via the pgAdmin web UI.
+
+---
+
+### Example Server Connection Settings
+
+| Field         | Value          |
+| ------------- | -------------- |
+| Host          | `postgres`     |
+| Port          | `5432`         |
+| Username      | `autoria`      |
+| Password      | `autoria`      |
+| Database      | `autodb`       |
+
+---
+
+**Tip:**  
+You can find or change these credentials in your `.env` file or directly in the `docker-compose.yml`.
+
 ## Contributing
 
 1. Fork the repository
