@@ -35,7 +35,7 @@ git clone https://github.com/d-stegantsev/auto-ria-scraper.git
 cd auto-ria-scraper
 ```
 
-Copy the example environment file and adjust values as needed:
+Copy the example environment files in root and selenium folders and adjust values as needed:
 
 ```bash
 cp .env.example .env
